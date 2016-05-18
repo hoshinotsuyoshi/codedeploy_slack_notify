@@ -24,8 +24,20 @@ GITHUB_URL_PREFIX = 'https://github.com'
 
 client = Aws::CodeDeploy::Client.new
 
-git_hub_location = client.get_deployment(deployment_id: DEPLOYMENT_ID).
-  deployment_info.
+deployment_info = client.get_deployment(deployment_id: DEPLOYMENT_ID).deployment_info
+
+overview = deployment_info.deployment_overview
+
+if overview.pending.nonzero? || \
+  overview.in_progress.nonzero? || \
+  overview.failed.nonzero? || \
+  overview.succeeded.zero?
+
+  # Deploy has not finished yet.
+  exit 0
+end
+
+git_hub_location = deployment_info.
   revision.
   git_hub_location
 
