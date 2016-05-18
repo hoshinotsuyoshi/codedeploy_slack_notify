@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require 'aws-sdk-core'
+require 'json'
+require 'net/http'
+
+DEPLOYMENT_ID = ENV['DEPLOYMENT_ID']
+unless DEPLOYMENT_ID
+  puts '"$DEPLOYMENT_ID" required.'
+  exit 1
+end
+
+SLACK_WEBHOOK_URL = ENV['SLACK_WEBHOOK_URL']
+unless SLACK_WEBHOOK_URL
+  puts '"$SLACK_WEBHOOK_URL" required.'
+  exit 1
+end
+
+SLACK_CHANNEL = ENV.fetch('SLACK_CHANNEL', '#random')
+SLACK_USERNAME = ENV.fetch('SLACK_USERNAME', 'bot')
+SLACK_ICON_EMOJI = ENV.fetch('SLACK_ICON_EMOJI', ':ghost:')
+SLACK_SSL_PORT = 443
+GITHUB_URL_PREFIX = 'https://github.com'
+
+client = Aws::CodeDeploy::Client.new
+
+git_hub_location = client.get_deployment(deployment_id: DEPLOYMENT_ID).
+  deployment_info.
+  revision.
+  git_hub_location
+
+github_commit_url = [
+  GITHUB_URL_PREFIX,
+  git_hub_location.repository,
+  'commit',
+  git_hub_location.commit_id
+].join('/')
+
+message = 'Deployed: ' + github_commit_url
+
+url = URI(SLACK_WEBHOOK_URL)
+request = Net::HTTP::Post.new(url.path)
+json = {
+  channel: SLACK_CHANNEL,
+  username: SLACK_USERNAME,
+  icon_emoji: SLACK_ICON_EMOJI,
+  text: message
+}.to_json
+
+request.set_form_data(
+  {'payload' => json},
+  ';',
+)
+
+https = Net::HTTP.new(url.host, SLACK_SSL_PORT)
+https.use_ssl = true
+response = https.start{|http| http.request(request)}
+
+case response
+when Net::HTTPOK
+  exit 0
+else
+  exit 1
+end
