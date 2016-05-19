@@ -1,5 +1,9 @@
 # CodedeploySlackNotify
 
+Slack notifier by using [AWS Codedeploy](https://aws.amazon.com/en/codedeploy/)'s DEPLOYMENT_ID
+
+![slack](https://cloud.githubusercontent.com/assets/1394049/15384111/f82bd484-1dd2-11e6-97f9-13d5fdc126fb.png)
+
 ## Installation
 
 Add this line to your application's Gemfile:
