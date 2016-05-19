@@ -2,7 +2,7 @@
 
 ## Installation
 
-TODO: Add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
 gem 'codedeploy_slack_notify'
@@ -25,6 +25,10 @@ SLACK_USERNAME=xxxxxxxxxxxxxxxx \
 DEPLOYMENT_ID=d-xxxxxxx \
 codedeploy_slack_notify
 ```
+
+## Note
+
+Supports only "Deployment Config: `CodeDeployDefault.OneAtATime`"
 
 ## License
 
